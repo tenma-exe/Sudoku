@@ -107,24 +107,25 @@ void display_boad(boad disp_boad,int n) {
         }
         printf("\n");
     }
-    int i_test = 1, j_test = 4;
+    /*int i_test = 1, j_test = 4;
     printf("cell[%d][%d]:%d\n", i_test, j_test, disp_boad.cell[i_test][j_test]);
     for (int i = 0; i < n + 1; i++) {
         printf("memo[ %d ]: %d\n",i, disp_boad.memo[i_test][j_test][i]);
-    }
+    }*/
 }
 
 void cal_Process(){
     int time_limit = 0;
+    int mini_n_cell = sqrt(n_cell); //3
     while (1) {
         except_line(Main_boad,n_cell);
-        search_number(Main_boad, Nine_cell);
+        search_number(Main_boad, Nine_cell,n_cell);
         for (int i = 0; i < n_cell;i++) {
-            except_cell(&Nine_cell[i],3);
+            except_cell(&Nine_cell[i],mini_n_cell);
             //printf("\n");
         }
-        memo_data_pass(Main_boad,Nine_cell);
-        search_number(Main_boad,Nine_cell);
+        memo_data_pass(Main_boad,Nine_cell,n_cell);
+        search_number(Main_boad,Nine_cell,n_cell);
         time_limit++;
         if (cheak_ans(Main_boad, n_cell)) {
             printf("Complete : %d counts\n",time_limit);
