@@ -107,11 +107,11 @@ void display_boad(boad disp_boad,int n) {
         }
         printf("\n");
     }
-    /*int i_test = 1, j_test = 4;
+    int i_test = 1, j_test = 4;
     printf("cell[%d][%d]:%d\n", i_test, j_test, disp_boad.cell[i_test][j_test]);
     for (int i = 0; i < n + 1; i++) {
         printf("memo[ %d ]: %d\n",i, disp_boad.memo[i_test][j_test][i]);
-    }*/
+    }
 }
 
 void cal_Process(){
