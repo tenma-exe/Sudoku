@@ -39,6 +39,7 @@ void read_data(boad* Main_boad) {
     FILE* fp;
     int i,j;
     int icell = 0;
+    int mini_n_cell = sqrt(n_cell);//3
     const char* fname = "Sudoku_data.txt";
     if ((fp = fopen(fname, "r")) == NULL) {
         printf("Not open %s\n", fname);
@@ -47,7 +48,7 @@ void read_data(boad* Main_boad) {
     else {
         printf("%s file is opened\n",fname);
     }
-    for (i = 0; i < 9; i++) {
+    for (i = 0; i < n_cell; i++) {
         fscanf_s(fp, "%d %d %d %d %d %d %d %d %d \n"
             , &Main_boad->cell[i][0], &Main_boad->cell[i][1], &Main_boad->cell[i][2]
             , &Main_boad->cell[i][3], &Main_boad->cell[i][4], &Main_boad->cell[i][5]
@@ -61,14 +62,14 @@ void read_data(boad* Main_boad) {
     Nine_cell = (boad*)malloc(sizeof(boad) * n_cell);
     if (Nine_cell) {
         for (int k = 0; k < n_cell; k++) {
-            Nine_cell[k].cell = (int**)malloc(sizeof(int*) * 3);
-            Nine_cell[k].memo = (int***)malloc(sizeof(int**) * 3);
-            for (i = 0; i < 3; i++) {
-                if (Nine_cell[k].cell&& Nine_cell[k].memo) {
-                    Nine_cell[k].cell[i] = (int*)malloc(sizeof(int) * 3);
-                    Nine_cell[k].memo[i] = (int**)malloc(sizeof(int*) * 3);
+            Nine_cell[k].cell = (int**)malloc(sizeof(int*) * mini_n_cell);
+            Nine_cell[k].memo = (int***)malloc(sizeof(int**) * mini_n_cell);
+            for (i = 0; i < mini_n_cell; i++) {
+                if (Nine_cell[k].cell != NULL && Nine_cell[k].memo != NULL) {
+                    Nine_cell[k].cell[i] = (int*)malloc(sizeof(int) * mini_n_cell);
+                    Nine_cell[k].memo[i] = (int**)malloc(sizeof(int*) * mini_n_cell);
                     for (j = 0; j < n_cell; j++) {
-                        if(Nine_cell[k].memo[i]) Nine_cell[k].memo[i][j] = (int*)malloc(sizeof(int) * (n_cell + 1));
+                        if (Nine_cell[k].memo[i] != NULL) Nine_cell[k].memo[i][j] = (int*)malloc(sizeof(int) * (n_cell + 1));
                     }
                 }
             }
@@ -77,24 +78,24 @@ void read_data(boad* Main_boad) {
     }
 
     for (i = 0; i < n_cell; i++) {
-        if(Nine_cell) clear_memo(&Nine_cell[i], 3);
+        if(Nine_cell) clear_memo(&Nine_cell[i], mini_n_cell);
     }
     int m = 0, k = 0, n = 0;
     for (i = 0; i < n_cell; i++, k++) {
-        if (k >= 3) k = 0;
+        if (k >= mini_n_cell) k = 0;
         if (i < 3) n = 0;
         else if (i < 6)n = 3;
         else n = 6;
         for (j = 0, m = 0; j < n_cell; j++, m++) {
-            if (m >= 3) m = 0;
+            if (m >= mini_n_cell) m = 0;
+            if (j != 0 && j % mini_n_cell == 0) n++;
             icell = Main_boad->cell[i][j];
-            //printf("icell:%d j:%d k:%d n:%d m:%d\n",icell,j, k, n, m);
             if (Nine_cell && Nine_cell[n].cell && Nine_cell[n].cell[k]
                 && Nine_cell[n].memo && Nine_cell[n].memo[k] && Nine_cell[n].memo[k][m]) {
                 Nine_cell[n].cell[k][m] = icell;
                 Nine_cell[n].memo[k][m][icell] = Main_boad->memo[i][j][icell];
             }
-            if ((j + 1) % 3 == 0) n++;
+            
         }
     }
     fclose(fp);
@@ -107,25 +108,33 @@ void display_boad(boad disp_boad,int n) {
         }
         printf("\n");
     }
-    /*int i_test = 1, j_test = 4;
-    printf("cell[%d][%d]:%d\n", i_test, j_test, disp_boad.cell[i_test][j_test]);
-    for (int i = 0; i < n + 1; i++) {
-        printf("memo[ %d ]: %d\n",i, disp_boad.memo[i_test][j_test][i]);
-    }*/
+}
+
+int i_test = 0, j_test = 2, cell_num = 1;
+
+void display_memo(int num,int* memo) {
+    printf("cell[%d][%d]:%d\n", i_test, j_test,num);
+    for (int i = 0; i <= n_cell; i++) {
+        printf("memo[ %d ]: %d\n", i, memo[i]);
+    }
 }
 
 void cal_Process(){
     int time_limit = 0;
     int mini_n_cell = sqrt(n_cell); //3
     while (1) {
-        except_line(Main_boad,n_cell);
-        search_number(Main_boad, Nine_cell,n_cell);
-        for (int i = 0; i < n_cell;i++) {
-            except_cell(&Nine_cell[i],mini_n_cell);
-            //printf("\n");
+        except_line(Main_boad, n_cell);
+        search_number(Main_boad, Nine_cell, n_cell);
+        memo_data_pass(Main_boad, Nine_cell, n_cell);
+        for (int i = 0; i < n_cell; i++) {
+            except_cell(&Nine_cell[i], mini_n_cell);
         }
-        memo_data_pass(Main_boad,Nine_cell,n_cell);
-        search_number(Main_boad,Nine_cell,n_cell);
+        memo_data_pass(Main_boad, Nine_cell, n_cell);
+        search_number(Main_boad, Nine_cell, n_cell);
+        for (int i = 0; i < n_cell;i++) {
+            uniNum_in_cells(&Nine_cell[i], mini_n_cell);
+        }
+        ansNum_data_pass(Main_boad,Nine_cell,n_cell);
         time_limit++;
         if (cheak_ans(Main_boad, n_cell)) {
             printf("Complete : %d counts\n",time_limit);
@@ -159,12 +168,13 @@ int main()
     clear_memo(Main_boad, n_cell);
     read_data(Main_boad);
     printf("First posion:\n");
-    if(Main_boad) display_boad(*Main_boad,n_cell);
-    /*printf("3*3 posion:\n");
-    display_boad(Nine_cell[0],3);*/
+    if (Main_boad) display_boad(*Main_boad, n_cell);
+    display_memo(Nine_cell[cell_num].cell[i_test][j_test], Nine_cell[cell_num].memo[i_test][j_test]);
+
     cal_Process();
     printf("result:\n");
     if (Main_boad) display_boad(*Main_boad, n_cell);
+    display_memo(Nine_cell[cell_num].cell[i_test][j_test],Nine_cell[cell_num].memo[i_test][j_test]);
     finalize();
     return 0;
 }

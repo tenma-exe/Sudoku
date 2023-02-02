@@ -3,7 +3,7 @@
 void clear_memo(boad* B,int n_cell) {
 	for (int i = 0; i < n_cell;i++) {
 		for (int j = 0; j < n_cell;j++) {
-			for (int k = 0; k <= n_cell; k++) {
+			for (int k = 0; k <= 9; k++) {
 				B->memo[i][j][k] = 1;
 			}
 		}
@@ -76,6 +76,8 @@ void memo_data_pass(boad* main_B, boad* nine_B,int n_cell) {
 			for (zero_to_nine = 0; zero_to_nine < 10; zero_to_nine++) {
 				if (nine_B[nine_blocks].memo[nine_B_tate][nine_B_yoko][zero_to_nine] == 0)
 					main_B->memo[tate][yoko][zero_to_nine] = 0;
+				else if (main_B->memo[tate][yoko][zero_to_nine] == 0)
+					nine_B[nine_blocks].memo[nine_B_tate][nine_B_yoko][zero_to_nine] = 0;
 			}
 		}
 	}
@@ -116,6 +118,50 @@ void search_number(boad* main_B, boad* nine_B,int n_cell) {
 				nine_B[nine_blocks].cell[nine_B_tate][nine_B_yoko] = ans;
 				main_B->memo[tate][yoko][ans] = 2;
 				nine_B[nine_blocks].memo[nine_B_tate][nine_B_yoko] = main_B->memo[tate][yoko];
+			}
+		}
+	}
+}
+
+void uniNum_in_cells(boad* nine_B,int n_cell) {
+	int i = 0, j = 0;
+	int one_to_nine = 1;//1Å`9
+	int figure_count = 0, i_ans = 0, j_ans = 0;
+	for (one_to_nine = 1, i_ans = 0, j_ans = 0; one_to_nine < 10; one_to_nine++) {
+		figure_count = 0;
+		for (i = 0; i < n_cell; i++) {
+			for (j = 0; j < n_cell; j++) {
+				if (nine_B->cell[i][j] == 0 && nine_B->memo[i][j][one_to_nine] == 1) {
+					figure_count++;
+					i_ans = i;
+					j_ans = j;
+				}
+			}
+		}
+		if (figure_count == 1) {
+			clear_cell_memo(nine_B->memo[i_ans][j_ans]);
+			nine_B->cell[i_ans][j_ans] = one_to_nine;
+			nine_B->memo[i_ans][j_ans][one_to_nine] = 2;
+		}
+	}
+}
+
+void ansNum_data_pass(boad* main_B, boad* nine_B, int n_cell) {
+	int tate = 0, yoko = 0;
+	int	nine_B_yoko = 0, nine_B_tate = 0, nine_blocks = 0, zero_to_nine = 0;
+	//nine_blocks:0~8 
+	for (tate = 0; tate < n_cell; tate++, nine_B_tate++) {
+		if (nine_B_tate >= 3) nine_B_tate = 0;
+		if (tate < 3) nine_blocks = 0;
+		else if (tate < 6) nine_blocks = 3;
+		else nine_blocks = 6;
+		for (yoko = 0, nine_B_yoko = 0; yoko < n_cell; yoko++, nine_B_yoko++) {
+			//[n][k][m]
+			if (nine_B_yoko >= 3) nine_B_yoko = 0;
+			if (yoko != 0 && yoko % 3 == 0) nine_blocks++;
+			if (main_B->cell[tate][yoko] == 0 && nine_B[nine_blocks].cell[nine_B_tate][nine_B_yoko] != 0) {
+				main_B->cell[tate][yoko] = nine_B[nine_blocks].cell[nine_B_tate][nine_B_yoko];
+				main_B->memo[tate][yoko] = nine_B[nine_blocks].memo[nine_B_tate][nine_B_yoko];
 			}
 		}
 	}

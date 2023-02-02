@@ -13,3 +13,7 @@ void memo_data_pass(boad* main_B,boad* nine_B,int n_cell);
 
 void clear_cell_memo(int* memo);
 void search_number(boad* main_B, boad* nine_B,int n_cell);
+
+void uniNum_in_cells(boad* nine_B,int n_cell);
+
+void ansNum_data_pass(boad* main_B, boad* nine_B, int n_cell);
