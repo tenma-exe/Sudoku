@@ -110,7 +110,7 @@ void display_boad(boad disp_boad,int n) {
     }
 }
 
-int i_test = 0, j_test = 2, cell_num = 1;
+int i_test = 0, j_test = 0, cell_num = 2;
 
 void display_memo(int num,int* memo) {
     printf("cell[%d][%d]:%d\n", i_test, j_test,num);
@@ -119,8 +119,10 @@ void display_memo(int num,int* memo) {
     }
 }
 
+int time_limit = 20;
+
 void cal_Process(){
-    int time_limit = 0;
+    int Loop_count = 0;
     int mini_n_cell = sqrt(n_cell); //3
     while (1) {
         except_line(Main_boad, n_cell);
@@ -130,18 +132,18 @@ void cal_Process(){
             except_cell(&Nine_cell[i], mini_n_cell);
         }
         memo_data_pass(Main_boad, Nine_cell, n_cell);
-        search_number(Main_boad, Nine_cell, n_cell);
+        //search_number(Main_boad, Nine_cell, n_cell);
         for (int i = 0; i < n_cell;i++) {
             uniNum_in_cells(&Nine_cell[i], mini_n_cell);
         }
         ansNum_data_pass(Main_boad,Nine_cell,n_cell);
-        time_limit++;
+        Loop_count++;
         if (cheak_ans(Main_boad, n_cell)) {
-            printf("Complete : %d counts\n",time_limit);
+            printf("Complete! : %d counts\n",Loop_count);
             break; 
         }
-        if (time_limit>=10000) {
-            printf("It's time over! : %d counts\n",time_limit);
+        if (Loop_count>=time_limit) {
+            printf("It's time over! : %d counts\n",Loop_count);
             break;
         }
     }
