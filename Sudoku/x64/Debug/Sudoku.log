@@ -1,4 +1,4 @@
 ﻿  Sudoku.cpp
 C:\Users\tenma\source\repos\Sudoku\Sudoku\Sudoku.cpp(42,21): warning C4244: '初期化中': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\Users\tenma\source\repos\Sudoku\Sudoku\Sudoku.cpp(126,21): warning C4244: '初期化中': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\Users\tenma\source\repos\Sudoku\Sudoku\Sudoku.cpp(134,21): warning C4244: '初期化中': 'double' から 'int' への変換です。データが失われる可能性があります。
   Sudoku.vcxproj -> C:\Users\tenma\source\repos\Sudoku\x64\Debug\Sudoku.exe

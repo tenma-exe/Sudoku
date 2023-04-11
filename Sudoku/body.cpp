@@ -99,8 +99,7 @@ void search_number(boad* main_B, boad* nine_B,int n_cell) {
 		if (tate < 3) nine_blocks = 0;
 		else if (tate < 6) nine_blocks = 3;
 		else nine_blocks = 6;
-		for (yoko = 0, nine_B_yoko = 0; yoko < n_cell; yoko++, nine_B_yoko++) {
-			figure_count = 0;
+		for (yoko = 0, nine_B_yoko = 0; yoko < n_cell; yoko++, nine_B_yoko++, figure_count = 0) {
 			//[n][k][m]
 			if (nine_B_yoko >= mini_n_cell) nine_B_yoko = 0;
 			if (yoko != 0 && yoko % mini_n_cell == 0) nine_blocks++;
@@ -165,4 +164,61 @@ void ansNum_data_pass(boad* main_B, boad* nine_B, int n_cell) {
 			}
 		}
 	}
+}
+
+void one_Line_judge(boad* main_B, int n_cell, int n_brock, int jo_chu_ge[3][3], int one_to_nine, int judge_cell) {
+	int i = 0;
+	int ignore_area = 3 * judge_cell;
+	if (jo_chu_ge[0][judge_cell] == 1 && jo_chu_ge[1][judge_cell] == 0 && jo_chu_ge[2][judge_cell] == 0) {
+		for (i = 0; i < n_cell; i++) {
+			if ((i >= ignore_area && i < ignore_area + 3) || main_B->cell[n_brock][i] != 0) continue;
+			main_B->memo[n_brock][i][one_to_nine] = 0;
+		}
+	}
+	else if (jo_chu_ge[0][judge_cell] == 0 && jo_chu_ge[1][judge_cell] == 1 && jo_chu_ge[2][judge_cell] == 0) {
+		for (i = 0; i < n_cell; i++) {
+			if ((i >= ignore_area && i < ignore_area + 3) || main_B->cell[n_brock][i] != 0) continue;
+			main_B->memo[n_brock + 1][i][one_to_nine] = 0;
+		}
+	}
+	else if (jo_chu_ge[0][judge_cell] == 0 && jo_chu_ge[1][judge_cell] == 0 && jo_chu_ge[2][judge_cell] == 1) {
+		for (i = 0; i < n_cell; i++) {
+			if ((i >= ignore_area && i < ignore_area + 3) || main_B->cell[n_brock][i] != 0) continue;
+			main_B->memo[n_brock + 2][i][one_to_nine] = 0;
+		}
+	}
+}
+
+void uniLine_jo_chu_ge(boad* main_B, int n_cell, int mini_n_cell, int n_brock) {
+	int tate = 0, yoko = 0, cell = 0;
+	int one_to_nine = 1;
+
+	//各セルのマーキング　上:[0][0]~[0][2] 中:[1][0]~[1][2] 下:[2][0]~[2][2]
+	//1:候補
+	int jo_chu_ge[3][3]{0};
+
+	for (one_to_nine = 1; one_to_nine <= n_cell; one_to_nine++) {
+		
+		//マーキング
+		for (tate = n_brock; tate < n_brock + mini_n_cell; tate++) {
+			for (yoko = 0, cell = 0; yoko < n_cell; yoko++) {
+				if (yoko != 0 && yoko % 3 == 0) cell++;
+				if (main_B->cell[tate][yoko] == 0 && main_B->memo[tate][yoko][one_to_nine] == 1) {
+					jo_chu_ge[tate - n_brock][cell] = 1;
+				}
+			}
+		}
+		
+		//判定
+		for (int judge_cell = 0; judge_cell < mini_n_cell; judge_cell++) {
+			one_Line_judge(main_B, n_cell, n_brock, jo_chu_ge, one_to_nine, judge_cell);
+		}
+
+		//値リセット
+		for (int i = 0; i < mini_n_cell; i++) {
+			for (int j = 0; j < mini_n_cell; j++) {
+				jo_chu_ge[i][j] = 0;
+			}
+		}
+	}	
 }

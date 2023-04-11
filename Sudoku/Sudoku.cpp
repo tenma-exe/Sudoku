@@ -57,6 +57,8 @@ void read_data(boad* Main_boad) {
         for (j = 0; j < n_cell;j++) {
             icell = Main_boad->cell[i][j];
             Main_boad->memo[i][j][icell] = 2;
+            if (icell != 0) Main_boad->initial_figure[i][j] = 1;
+            else Main_boad->initial_figure[i][j] = 0;
         }
     }
     Nine_cell = (boad*)malloc(sizeof(boad) * n_cell);
@@ -64,16 +66,17 @@ void read_data(boad* Main_boad) {
         for (int k = 0; k < n_cell; k++) {
             Nine_cell[k].cell = (int**)malloc(sizeof(int*) * mini_n_cell);
             Nine_cell[k].memo = (int***)malloc(sizeof(int**) * mini_n_cell);
+            Nine_cell[k].initial_figure = (int**)malloc(sizeof(int*) * mini_n_cell);
             for (i = 0; i < mini_n_cell; i++) {
                 if (Nine_cell[k].cell != NULL && Nine_cell[k].memo != NULL) {
                     Nine_cell[k].cell[i] = (int*)malloc(sizeof(int) * mini_n_cell);
                     Nine_cell[k].memo[i] = (int**)malloc(sizeof(int*) * mini_n_cell);
+                    Nine_cell[k].initial_figure[i] = (int*)malloc(sizeof(int) * mini_n_cell);
                     for (j = 0; j < n_cell; j++) {
                         if (Nine_cell[k].memo[i] != NULL) Nine_cell[k].memo[i][j] = (int*)malloc(sizeof(int) * (n_cell + 1));
                     }
                 }
             }
-            
         }
     }
 
@@ -94,6 +97,7 @@ void read_data(boad* Main_boad) {
                 && Nine_cell[n].memo && Nine_cell[n].memo[k] && Nine_cell[n].memo[k][m]) {
                 Nine_cell[n].cell[k][m] = icell;
                 Nine_cell[n].memo[k][m][icell] = Main_boad->memo[i][j][icell];
+                Nine_cell[n].initial_figure[k][m] = Main_boad->initial_figure[i][j];
             }
             
         }
@@ -104,10 +108,13 @@ void read_data(boad* Main_boad) {
 void display_boad(boad disp_boad,int n) {
     for (int i = 0; i < n;i++) {
         for (int j = 0; j < n;j++) {
-            printf("%2d", disp_boad.cell[i][j]);
+            if (disp_boad.initial_figure[i][j] == 1) printf("\x1B[32;1m%2d\x1B[37;m", disp_boad.cell[i][j]); //初期値は青
+            else if (disp_boad.cell[i][j] != 0) printf("\x1B[34;1m%2d\x1B[37;m", disp_boad.cell[i][j]); //解答は緑
+            else printf("%2d", disp_boad.cell[i][j]); //無回答は白
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 int i_test = 0, j_test = 0, cell_num = 2;
@@ -119,31 +126,38 @@ void display_memo(int num,int* memo) {
     }
 }
 
-int time_limit = 20;
-
+int time_limit = 100;
+//解答する関数を連続して書かない
 void cal_Process(){
+    int i = 0;
     int Loop_count = 0;
     int mini_n_cell = sqrt(n_cell); //3
     while (1) {
         except_line(Main_boad, n_cell);
         search_number(Main_boad, Nine_cell, n_cell);
         memo_data_pass(Main_boad, Nine_cell, n_cell);
-        for (int i = 0; i < n_cell; i++) {
+        for (i = 0; i < n_cell; i++) {
             except_cell(&Nine_cell[i], mini_n_cell);
         }
         memo_data_pass(Main_boad, Nine_cell, n_cell);
-        //search_number(Main_boad, Nine_cell, n_cell);
-        for (int i = 0; i < n_cell;i++) {
+        for (i = 0; i < n_cell;i++) {
             uniNum_in_cells(&Nine_cell[i], mini_n_cell);
         }
-        ansNum_data_pass(Main_boad,Nine_cell,n_cell);
+        ansNum_data_pass(Main_boad, Nine_cell, n_cell);
+
+        except_line(Main_boad, n_cell);
+        for (i = 0; i < n_cell; i = i + 3) {
+            uniLine_jo_chu_ge(Main_boad, n_cell, mini_n_cell, i);
+        }
+        search_number(Main_boad, Nine_cell, n_cell);
+
         Loop_count++;
         if (cheak_ans(Main_boad, n_cell)) {
-            printf("Complete! : %d counts\n",Loop_count);
+            printf("\nComplete! : %d counts\n",Loop_count);
             break; 
         }
         if (Loop_count>=time_limit) {
-            printf("It's time over! : %d counts\n",Loop_count);
+            printf("\nIt's time over! : %d counts\n",Loop_count);
             break;
         }
     }
@@ -151,15 +165,27 @@ void cal_Process(){
 
 int main()
 {
+    //表示色設定
+    HANDLE stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD consoleMode = 0;
+    GetConsoleMode(stdOut, &consoleMode);
+    consoleMode = consoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(stdOut, consoleMode);
+    // printf("\x1B[32;1m Displaying_Word \x1B[37;m\n"); //色彩テスト＋テンプレート
+    // リセット：0m　黒：30m　赤：31m　緑：32m　黄：33m　青：34m　マゼンタ：35m　シアン：36m　白：37m
+
+    //プレート確保
     Main_boad = (boad*)malloc(sizeof(boad));
     if (Main_boad) {
         Main_boad->cell = (int**)malloc(sizeof(int*) * n_cell);
         Main_boad->memo = (int***)malloc(sizeof(int**) * n_cell);
+        Main_boad->initial_figure = (int**)malloc(sizeof(int*) * n_cell);
     }
     for (int i = 0; i < n_cell; i++){
         if (Main_boad&&Main_boad->cell&& Main_boad->memo) {
             Main_boad->cell[i] = (int*)malloc(sizeof(int) * n_cell);
             Main_boad->memo[i] = (int**)malloc(sizeof(int*) * n_cell);
+            Main_boad->initial_figure[i] = (int*)malloc(sizeof(int) * n_cell);
         }
         for (int j = 0; j < n_cell;j++) {
             if (Main_boad && Main_boad->memo && Main_boad->memo[i]) {
@@ -174,6 +200,7 @@ int main()
     display_memo(Nine_cell[cell_num].cell[i_test][j_test], Nine_cell[cell_num].memo[i_test][j_test]);
 
     cal_Process();
+    printf("\n");
     printf("result:\n");
     if (Main_boad) display_boad(*Main_boad, n_cell);
     display_memo(Nine_cell[cell_num].cell[i_test][j_test],Nine_cell[cell_num].memo[i_test][j_test]);
