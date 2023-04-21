@@ -166,7 +166,7 @@ void ansNum_data_pass(boad* main_B, boad* nine_B, int n_cell) {
 	}
 }
 
-void one_Line_judge(boad* main_B, int n_cell, int n_brock, int jo_chu_ge[3][3], int one_to_nine, int judge_cell) {
+void one_Line_judge_yoko(boad* main_B, int n_cell, int n_brock, int jo_chu_ge[3][3], int one_to_nine, int judge_cell ) {
 	int i = 0;
 	int ignore_area = 3 * judge_cell;
 	if (jo_chu_ge[0][judge_cell] == 1 && jo_chu_ge[1][judge_cell] == 0 && jo_chu_ge[2][judge_cell] == 0) {
@@ -185,6 +185,42 @@ void one_Line_judge(boad* main_B, int n_cell, int n_brock, int jo_chu_ge[3][3], 
 		for (i = 0; i < n_cell; i++) {
 			if ((i >= ignore_area && i < ignore_area + 3) || main_B->cell[n_brock][i] != 0) continue;
 			main_B->memo[n_brock + 2][i][one_to_nine] = 0;
+		}
+	}
+}
+
+void dual_Line_judge_yoko(boad* main_B, int n_cell, int n_brock, int jo_chu_ge[3][3], int one_to_nine, int judge_line) {
+	int i = 0, j = 0;
+	int mini_n_cell = sqrt(n_cell);
+	int applicable_area = 0;
+	if (jo_chu_ge[judge_line][0] == 1 && jo_chu_ge[judge_line][1] == 0 && jo_chu_ge[judge_line][2] == 0) {
+		applicable_area = 0;
+		for (j = 0; j < mini_n_cell; j++) {
+			for (i = 0; i < n_cell; i++) {
+				if (j == judge_line || (i < applicable_area || i >= applicable_area + 3) 
+					|| main_B->cell[n_brock + j][i] != 0) continue;
+				main_B->memo[n_brock + j][i][one_to_nine] = 0;
+			}
+		}
+	}
+	else if (jo_chu_ge[judge_line][0] == 0 && jo_chu_ge[judge_line][1] == 1 && jo_chu_ge[judge_line][2] == 0) {
+		applicable_area = 3;
+		for (j = 0; j < mini_n_cell; j++) {
+			for (i = 0; i < n_cell; i++) {
+				if (j == judge_line ||(i < applicable_area || i >= applicable_area + 3)
+					|| main_B->cell[n_brock + j][i] != 0) continue;
+				main_B->memo[n_brock + j][i][one_to_nine] = 0;
+			}
+		}
+	}
+	else if (jo_chu_ge[judge_line][0] == 0 && jo_chu_ge[judge_line][1] == 0 && jo_chu_ge[judge_line][2] == 1) {
+		applicable_area = 6;
+		for (j = 0; j < mini_n_cell; j++) {
+			for (i = 0; i < n_cell; i++) {
+				if (j == judge_line || (i < applicable_area || i >= applicable_area + 3)
+					|| main_B->cell[n_brock + j][i] != 0) continue;
+				main_B->memo[n_brock + j][i][one_to_nine] = 0;
+			}
 		}
 	}
 }
@@ -211,14 +247,110 @@ void uniLine_jo_chu_ge(boad* main_B, int n_cell, int mini_n_cell, int n_brock) {
 		
 		//判定
 		for (int judge_cell = 0; judge_cell < mini_n_cell; judge_cell++) {
-			one_Line_judge(main_B, n_cell, n_brock, jo_chu_ge, one_to_nine, judge_cell);
+			one_Line_judge_yoko(main_B, n_cell, n_brock, jo_chu_ge, one_to_nine, judge_cell);
+			dual_Line_judge_yoko(main_B, n_cell, n_brock, jo_chu_ge, one_to_nine, judge_cell);
 		}
 
-		//値リセット
+		//jo_chu_ge[]値リセット
 		for (int i = 0; i < mini_n_cell; i++) {
 			for (int j = 0; j < mini_n_cell; j++) {
 				jo_chu_ge[i][j] = 0;
 			}
 		}
 	}	
+}
+
+void one_Line_judge_tate(boad* main_B, int n_cell, int n_brock, int sa_chu_u[3][3], int one_to_nine, int judge_cell) {
+	int i = 0;
+	int ignore_area = 3 * judge_cell;
+	if (sa_chu_u[0][judge_cell] == 1 && sa_chu_u[1][judge_cell] == 0 && sa_chu_u[2][judge_cell] == 0) {
+		for (i = 0; i < n_cell; i++) {
+			if ((i >= ignore_area && i < ignore_area + 3) || main_B->cell[i][n_brock] != 0) continue;
+			main_B->memo[i][n_brock][one_to_nine] = 0;
+		}
+	}
+	else if (sa_chu_u[0][judge_cell] == 0 && sa_chu_u[1][judge_cell] == 1 && sa_chu_u[2][judge_cell] == 0) {
+		for (i = 0; i < n_cell; i++) {
+			if ((i >= ignore_area && i < ignore_area + 3) || main_B->cell[i][n_brock] != 0) continue;
+			main_B->memo[i][n_brock + 1][one_to_nine] = 0;
+		}
+	}
+	else if (sa_chu_u[0][judge_cell] == 0 && sa_chu_u[1][judge_cell] == 0 && sa_chu_u[2][judge_cell] == 1) {
+		for (i = 0; i < n_cell; i++) {
+			if ((i >= ignore_area && i < ignore_area + 3) || main_B->cell[i][n_brock] != 0) continue;
+			main_B->memo[i][n_brock + 2][one_to_nine] = 0;
+		}
+	}
+}
+
+void dual_Line_judge_tate(boad* main_B, int n_cell, int n_brock, int jo_chu_ge[3][3], int one_to_nine, int judge_line) {
+	int i = 0, j = 0;
+	int mini_n_cell = sqrt(n_cell);
+	int applicable_area = 0;
+	if (jo_chu_ge[judge_line][0] == 1 && jo_chu_ge[judge_line][1] == 0 && jo_chu_ge[judge_line][2] == 0) {
+		applicable_area = 0;
+		for (j = 0; j < mini_n_cell; j++) {
+			for (i = 0; i < n_cell; i++) {
+				if (j == judge_line || (i < applicable_area || i >= applicable_area + 3)
+					|| main_B->cell[i][n_brock + j] != 0) continue;
+				main_B->memo[i][n_brock + j][one_to_nine] = 0;
+			}
+		}
+	}
+	else if (jo_chu_ge[judge_line][0] == 0 && jo_chu_ge[judge_line][1] == 1 && jo_chu_ge[judge_line][2] == 0) {
+		applicable_area = 3;
+		for (j = 0; j < mini_n_cell; j++) {
+			for (i = 0; i < n_cell; i++) {
+				if (j == judge_line || (i < applicable_area || i >= applicable_area + 3)
+					|| main_B->cell[i][n_brock + j] != 0) continue;
+				main_B->memo[i][n_brock + j][one_to_nine] = 0;
+			}
+		}
+	}
+	else if (jo_chu_ge[judge_line][0] == 0 && jo_chu_ge[judge_line][1] == 0 && jo_chu_ge[judge_line][2] == 1) {
+		applicable_area = 6;
+		for (j = 0; j < mini_n_cell; j++) {
+			for (i = 0; i < n_cell; i++) {
+				if (j == judge_line || (i < applicable_area || i >= applicable_area + 3)
+					|| main_B->cell[n_brock + j] != 0) continue;
+				main_B->memo[i][n_brock + j][one_to_nine] = 0;
+			}
+		}
+	}
+}
+
+
+void uniLine_sa_chu_u(boad* main_B, int n_cell, int mini_n_cell, int n_brock) {
+	int tate = 0, yoko = 0, cell = 0;
+	int one_to_nine = 1;
+
+	//各セルのマーキング　左:[0][0]~[0][2] 中:[1][0]~[1][2] 右:[2][0]~[2][2]
+	//1:候補
+	int sa_chu_u[3][3]{ 0 };
+
+	for (one_to_nine = 1; one_to_nine <= n_cell; one_to_nine++) {
+
+		//マーキング
+		for (yoko = n_brock; yoko < n_brock + mini_n_cell; yoko++) {
+			for (tate = 0, cell = 0; tate < n_cell; tate++) {
+				if (tate != 0 && tate % 3 == 0) cell++;
+				if (main_B->cell[tate][yoko] == 0 && main_B->memo[tate][yoko][one_to_nine] == 1) {
+					sa_chu_u[yoko - n_brock][cell] = 1;
+				}
+			}
+		}
+
+		//判定
+		for (int judge_cell = 0; judge_cell < mini_n_cell; judge_cell++) {
+			one_Line_judge_tate(main_B, n_cell, n_brock, sa_chu_u, one_to_nine, judge_cell);
+			dual_Line_judge_tate(main_B, n_cell, n_brock, sa_chu_u, one_to_nine, judge_cell);
+		}
+		
+		//sa_chu_u[]値リセット
+		for (int i = 0; i < mini_n_cell; i++) {
+			for (int j = 0; j < mini_n_cell; j++) {
+				sa_chu_u[i][j] = 0;
+			}
+		}
+	}
 }

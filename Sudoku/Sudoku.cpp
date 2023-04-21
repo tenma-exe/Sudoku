@@ -108,8 +108,8 @@ void read_data(boad* Main_boad) {
 void display_boad(boad disp_boad,int n) {
     for (int i = 0; i < n;i++) {
         for (int j = 0; j < n;j++) {
-            if (disp_boad.initial_figure[i][j] == 1) printf("\x1B[32;1m%2d\x1B[37;m", disp_boad.cell[i][j]); //初期値は青
-            else if (disp_boad.cell[i][j] != 0) printf("\x1B[34;1m%2d\x1B[37;m", disp_boad.cell[i][j]); //解答は緑
+            if (disp_boad.initial_figure[i][j] == 1) printf("\x1B[35;1m%2d\x1B[37;m", disp_boad.cell[i][j]); //初期値は緑
+            else if (disp_boad.cell[i][j] != 0) printf("\x1B[34;1m%2d\x1B[37;m", disp_boad.cell[i][j]); //解答は青
             else printf("%2d", disp_boad.cell[i][j]); //無回答は白
         }
         printf("\n");
@@ -126,7 +126,7 @@ void display_memo(int num,int* memo) {
     }
 }
 
-int time_limit = 100;
+int time_limit = 10;
 //解答する関数を連続して書かない
 void cal_Process(){
     int i = 0;
@@ -148,6 +148,7 @@ void cal_Process(){
         except_line(Main_boad, n_cell);
         for (i = 0; i < n_cell; i = i + 3) {
             uniLine_jo_chu_ge(Main_boad, n_cell, mini_n_cell, i);
+            uniLine_sa_chu_u(Main_boad, n_cell, mini_n_cell, i);
         }
         search_number(Main_boad, Nine_cell, n_cell);
 
@@ -160,6 +161,8 @@ void cal_Process(){
             printf("\nIt's time over! : %d counts\n",Loop_count);
             break;
         }
+        printf("%d Loops:\n",Loop_count);
+        display_boad(*Main_boad, n_cell);
     }
 }
 
@@ -197,13 +200,13 @@ int main()
     read_data(Main_boad);
     printf("First posion:\n");
     if (Main_boad) display_boad(*Main_boad, n_cell);
-    display_memo(Nine_cell[cell_num].cell[i_test][j_test], Nine_cell[cell_num].memo[i_test][j_test]);
+    //display_memo(Nine_cell[cell_num].cell[i_test][j_test], Nine_cell[cell_num].memo[i_test][j_test]);//確認用
 
     cal_Process();
     printf("\n");
     printf("result:\n");
     if (Main_boad) display_boad(*Main_boad, n_cell);
-    display_memo(Nine_cell[cell_num].cell[i_test][j_test],Nine_cell[cell_num].memo[i_test][j_test]);
+    //display_memo(Nine_cell[cell_num].cell[i_test][j_test],Nine_cell[cell_num].memo[i_test][j_test]);//確認用
     finalize();
     return 0;
 }
